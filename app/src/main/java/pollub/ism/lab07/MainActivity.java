@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
+
+import java.util.Calendar;
+import java.util.Date;
 
 import pollub.ism.lab07.databinding.ActivityMainBinding;
 
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private ArrayAdapter<CharSequence> adapter;
+    Date currentTime = Calendar.getInstance().getTime();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
         bazaDanych = Room.databaseBuilder(getApplicationContext(), BazaMagazynowa.class, BazaMagazynowa.NAZWA_BAZY)
                 .allowMainThreadQueries().build();
+
+
 
         if(bazaDanych.pozycjaMagazynowaDAO().size() == 0){
             String[] asortyment = getResources().getStringArray(R.array.Asortyment);
@@ -50,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         binding.przyciskSkladuj.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Tutaj kod do wykonania
+                zmienStan(OperacjaMagazynowa.SKLADUJ);
             }
         });
 
@@ -90,12 +97,17 @@ public class MainActivity extends AppCompatActivity {
         }finally {
             binding.edycjaIlosc.setText("");
         }
-
         switch (operacja){
-            case SKLADUJ: nowaIlosc = wybraneWarzywoIlosc + zmianaIlosci; break;
-            case WYDAJ: nowaIlosc = wybraneWarzywoIlosc - zmianaIlosci; break;
+            case SKLADUJ: nowaIlosc = wybraneWarzywoIlosc + zmianaIlosci;
+                break;
+            case WYDAJ: nowaIlosc = wybraneWarzywoIlosc - zmianaIlosci;
+                break;
         }
-
+        String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+        TextView tv2 = (TextView)findViewById(R.id.dateTime);
+        tv2.setText(currentDateTimeString);
+        TextView tv3 = (TextView)findViewById(R.id.list);
+        tv3.append("\n"+currentDateTimeString+" "+wybraneWarzywoIlosc.toString()+" -> "+nowaIlosc.toString());
         bazaDanych.pozycjaMagazynowaDAO().updateQuantityByName(wybraneWarzywoNazwa,nowaIlosc);
 
         aktualizuj();
